@@ -30,42 +30,16 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"
+                        <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" 
                            href="{{ url_for('dashboard') }}">
                             <i class="bi bi-speedometer2"></i> Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if 'patient' in request.endpoint %}active{% endif %}"
+                        <a class="nav-link {% if request.endpoint == 'patients' %}active{% endif %}" 
                            href="{{ url_for('patients') }}">
                             <i class="bi bi-people"></i> Patients
                         </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'medicine' in request.endpoint %}active{% endif %}"
-                           href="{{ url_for('medicines') }}">
-                            <i class="bi bi-capsule"></i> Medicines
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'prescription' in request.endpoint %}active{% endif %}"
-                           href="{{ url_for('prescriptions') }}">
-                            <i class="bi bi-file-medical"></i> Prescriptions
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if 'pharmac' in request.endpoint %}active{% endif %}"
-                           href="#" id="pharmacyDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-shop"></i> Pharmacies
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('pharmacies') }}">
-                                <i class="bi bi-list-ul"></i> All Pharmacies
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('find_nearest_pharmacies') }}">
-                                <i class="bi bi-geo-alt"></i> Find Nearest
-                            </a></li>
-                        </ul>
                     </li>
                 </ul>
                 <ul class="navbar-nav">

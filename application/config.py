@@ -37,19 +37,9 @@ class Config:
     
     # Pagination
     PATIENTS_PER_PAGE = 20
-
+    
     # Logging
     LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
-
-    # Phase 2: Redis Cache Configuration
-    CACHE_TYPE = 'redis' if os.environ.get('REDIS_URL') else 'simple'
-    CACHE_REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
-    CACHE_DEFAULT_TIMEOUT = 300  # 5 minutes
-    CACHE_KEY_PREFIX = 'sks_hospital:'
-
-    # Phase 2: Geolocation Settings
-    HOSPITAL_LATITUDE = float(os.environ.get('HOSPITAL_LATITUDE', '12.9716'))  # Bengaluru
-    HOSPITAL_LONGITUDE = float(os.environ.get('HOSPITAL_LONGITUDE', '77.5946'))  # Bengaluru
 
 class DevelopmentConfig(Config):
     """Development configuration"""
