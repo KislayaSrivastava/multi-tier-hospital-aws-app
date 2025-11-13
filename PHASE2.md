@@ -206,7 +206,7 @@ with app.app_context():
 cd /home/ec2-user/hospital-app/application
 
 # Pull latest code
-git pull origin claude/multi-tier-hospital-app-011CV5Zgs62tZLdCmsmjpPt1
+git pull origin main
 
 # Activate virtual environment
 source venv/bin/activate
