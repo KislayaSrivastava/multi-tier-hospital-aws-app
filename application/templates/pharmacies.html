@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Pharmacies - SKS Medical Center{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2><i class="bi bi-shop"></i> Partner Pharmacies</h2>
+            <p class="text-muted">Browse our network of partner pharmacies</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{{ url_for('find_nearest_pharmacies') }}" class="btn btn-info me-2">
+                <i class="bi bi-geo-alt"></i> Find Nearest
+            </a>
+            <a href="{{ url_for('new_pharmacy') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add Pharmacy
+            </a>
+        </div>
+    </div>
+
+    <!-- Pharmacies Grid -->
+    <div class="row">
+        {% if pharmacies %}
+            {% for pharmacy in pharmacies %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-shop-window"></i> {{ pharmacy.name }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <i class="bi bi-geo-alt text-danger"></i>
+                            <strong>Address:</strong><br>
+                            <small>{{ pharmacy.address }}</small>
+                        </p>
+                        <p class="mb-2">
+                            <i class="bi bi-telephone text-success"></i>
+                            <strong>Phone:</strong> {{ pharmacy.contact_number }}
+                        </p>
+                        {% if pharmacy.email %}
+                        <p class="mb-2">
+                            <i class="bi bi-envelope text-info"></i>
+                            <strong>Email:</strong> {{ pharmacy.email }}
+                        </p>
+                        {% endif %}
+                        {% if pharmacy.operating_hours %}
+                        <p class="mb-2">
+                            <i class="bi bi-clock text-warning"></i>
+                            <strong>Hours:</strong> {{ pharmacy.operating_hours }}
+                        </p>
+                        {% endif %}
+                        <p class="mb-0">
+                            <i class="bi bi-map text-primary"></i>
+                            <strong>Coordinates:</strong>
+                            <small>{{ pharmacy.latitude }}, {{ pharmacy.longitude }}</small>
+                        </p>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('pharmacy_detail', pharmacy_id=pharmacy.id) }}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View Details
+                            </a>
+                            <a href="{{ url_for('edit_pharmacy', pharmacy_id=pharmacy.id) }}"
+                               class="btn btn-sm btn-outline-warning">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle fs-1 d-block mb-3"></i>
+                <h4>No pharmacies found</h4>
+                <p class="mb-3">Get started by adding your first partner pharmacy.</p>
+                <a href="{{ url_for('new_pharmacy') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add First Pharmacy
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
