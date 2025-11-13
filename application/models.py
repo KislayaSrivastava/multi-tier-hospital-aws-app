@@ -19,9 +19,8 @@ class Doctor(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # Relationships
+    # Relationship with patients
     patients = db.relationship('Patient', backref='doctor', lazy='dynamic')
-    prescriptions_given = db.relationship('Prescription', backref='prescribing_doctor', lazy='dynamic', foreign_keys='Prescription.doctor_id')
     
     def set_password(self, password):
     # Use pbkdf2:sha256 instead of default scrypt
@@ -65,9 +64,7 @@ class Patient(db.Model):
     registered_by = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Relationships - will be defined by backrefs from Prescription model
-
+    
     @property
     def full_name(self):
         """Return full name of patient"""
@@ -89,61 +86,53 @@ class Patient(db.Model):
 class Pharmacy(db.Model):
     """Pharmacy model for storing pharmacy information (Phase 2)"""
     __tablename__ = 'pharmacies'
-
+    
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, index=True)
+    name = db.Column(db.String(100), nullable=False)
     address = db.Column(db.Text, nullable=False)
     contact_number = db.Column(db.String(20), nullable=False)
-    email = db.Column(db.String(100))
-    latitude = db.Column(db.Float, nullable=False)
-    longitude = db.Column(db.Float, nullable=False)
+    latitude = db.Column(db.Float)
+    longitude = db.Column(db.Float)
     operating_hours = db.Column(db.String(100))
-    is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
+    
     def __repr__(self):
         return f'<Pharmacy {self.name}>'
 
 class Medicine(db.Model):
     """Medicine model for storing medicine information (Phase 2)"""
     __tablename__ = 'medicines'
-
+    
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False, index=True)
     generic_name = db.Column(db.String(200))
     description = db.Column(db.Text)
-    category = db.Column(db.String(100))  # Antibiotic, Pain Relief, etc.
     dosage_form = db.Column(db.String(50))  # Tablet, Capsule, Syrup, etc.
     strength = db.Column(db.String(50))
     manufacturer = db.Column(db.String(100))
-    is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
+    
     def __repr__(self):
         return f'<Medicine {self.name}>'
 
 class Prescription(db.Model):
     """Prescription model for storing patient prescriptions (Phase 2)"""
     __tablename__ = 'prescriptions'
-
+    
     id = db.Column(db.Integer, primary_key=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patients.id'), nullable=False)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctors.id'), nullable=False)
     medicine_id = db.Column(db.Integer, db.ForeignKey('medicines.id'), nullable=False)
     dosage = db.Column(db.String(100), nullable=False)
-    frequency = db.Column(db.String(100), nullable=False)  # e.g., "3 times daily"
-    duration = db.Column(db.String(50), nullable=False)  # e.g., "7 days"
-    instructions = db.Column(db.Text)  # Special instructions
-    diagnosis = db.Column(db.Text)  # Diagnosis for this prescription
-    prescribed_date = db.Column(db.DateTime, default=datetime.utcnow, index=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
+    frequency = db.Column(db.String(100), nullable=False)
+    duration = db.Column(db.String(50), nullable=False)
+    instructions = db.Column(db.Text)
+    prescribed_date = db.Column(db.DateTime, default=datetime.utcnow)
+    
     # Relationships
     patient = db.relationship('Patient', backref='prescriptions')
+    prescribed_by = db.relationship('Doctor', backref='prescriptions')
     medicine = db.relationship('Medicine', backref='prescriptions')
-
+    
     def __repr__(self):
         return f'<Prescription {self.id} for Patient {self.patient_id}>'
