@@ -13,17 +13,32 @@
 
 > A production-ready, cloud-native hospital management system built on AWS, demonstrating enterprise-grade architecture patterns and DevOps best practices.
 
+## 🚀 What's New - Phase 2 Released!
+
+**Phase 2 is now complete!** The hospital management system now includes:
+- 💊 **Medicine Management** - Complete medicine database with 10 categories
+- 📋 **Digital Prescriptions** - Create and manage patient prescriptions
+- 🗺️ **Pharmacy Finder** - Interactive maps to find nearest pharmacies
+- ⚡ **Redis Caching** - Improved performance with caching layer
+
+**[View Phase 2 Documentation →](PHASE2.md)** | **[View Changelog →](CHANGELOG_PHASE2.md)**
+
+---
+
 ## Live Demo
 
 **Status:** Live and Running
   - **Application URL:** http://13.200.119.187:5000
   - **Region:** ap-south-1 (Mumbai)
   - **Deployment Date:** October 14, 2025
+  - **Current Version:** Phase 1 (Phase 2 in separate branch)
 
   **Demo Credentials:**
   UserName: kaashvi
   Password: kaashvi123
-  
+
+  **Phase 2 Features:** Available in branch `claude/multi-tier-hospital-app-011CV5Zgs62tZLdCmsmjpPt1`
+
   **Note:** This is a DEMO application. Do not enter real personal information.
 
 ##  Table of Contents
@@ -33,7 +48,8 @@
 - [Features](#features)
 - [Technology Stack](#technology-stack)
 - [Prerequisites](#prerequisites)
-- [Phase 1 - Current Implementation](#phase-1---current-implementation)
+- [Phase 1 - Patient Management](#phase-1---patient-management)
+- [Phase 2 - Medicine & Pharmacy (NEW!)](#phase-2---medicine--pharmacy-new)
 - [Getting Started](#getting-started)
 - [Deployment Guide](#deployment-guide)
 - [Future Enhancements](#future-enhancements)
@@ -99,7 +115,7 @@ SKS Medical Center is a comprehensive hospital management system designed to str
 
 ## Features
 
-### Phase 1 - Core Patient Management 
+### Phase 1 - Core Patient Management ✅
 
 - **User Authentication**
   - Doctor login system with session management
@@ -118,13 +134,32 @@ SKS Medical Center is a comprehensive hospital management system designed to str
   - Doctor profile management
   - Activity tracking
 
-### Phase 2 - Medicine & Pharmacy (Planned)
+### Phase 2 - Medicine & Pharmacy ✅ (NEW - COMPLETED!)
 
-- Medicine prescription module
-- Pharmacy database with geolocation
-- Nearest pharmacy finder (2-3 locations)
-- Redis caching for pharmacy data
-- Interactive maps
+- **Medicine Management**
+  - Complete medicine database with CRUD operations
+  - Search by name, generic name, or category
+  - 10 medicine categories (Antibiotic, Pain Relief, Cardiovascular, etc.)
+  - 8 dosage forms (Tablet, Capsule, Syrup, Injection, etc.)
+  - Manufacturer and strength tracking
+  - 10 pre-loaded sample medicines
+
+- **Digital Prescriptions**
+  - Create and manage patient prescriptions
+  - Dosage, frequency, and duration tracking
+  - Diagnosis and special instructions
+  - Print-friendly prescription view
+  - Prescription history per patient
+  - Patient-medicine-doctor mapping
+
+- **Pharmacy Finder with Geolocation**
+  - Interactive maps with Leaflet.js (OpenStreetMap)
+  - Find nearest 3 pharmacies automatically
+  - Geodesic distance calculation
+  - Google Maps integration for directions
+  - Operating hours and contact information
+  - 6 pre-loaded partner pharmacies in Bengaluru
+  - Redis caching for improved performance
 
 ### Phase 3 - Production Architecture (Planned)
 
@@ -133,7 +168,9 @@ SKS Medical Center is a comprehensive hospital management system designed to str
 - ElastiCache Redis cluster
 - CI/CD with GitHub Actions
 - CloudWatch monitoring
+- SMS/Email notifications
 - Payment gateway integration
+- Medicine inventory management
 
 ## 🛠️ Technology Stack
 
@@ -143,17 +180,22 @@ SKS Medical Center is a comprehensive hospital management system designed to str
 - **Compute:** EC2 (Amazon Linux 2)
 - **Database:** RDS PostgreSQL 14
 - **Networking:** VPC, Subnets, IGW, NAT Gateway
+- **Caching:** Redis (Phase 2) / SimpleCache
 
 ### Application
-- **Backend:** Python 3.9+, Flask 2.3
-- **ORM:** SQLAlchemy
+- **Backend:** Python 3.9+, Flask 3.0
+- **ORM:** SQLAlchemy 3.1
 - **Frontend:** Bootstrap 5, HTML5, CSS3, JavaScript
 - **Database:** PostgreSQL 14
+- **Maps:** Leaflet.js (OpenStreetMap)
+- **Caching:** Flask-Caching 2.1, Redis 5.0
+- **Geolocation:** Geopy 2.4
 
 ### DevOps & Monitoring
 - **Version Control:** Git, GitHub
 - **Configuration Management:** Python dotenv
 - **Logging:** Flask logging, CloudWatch (Phase 3)
+- **Performance:** Redis caching layer
 
 ##  Prerequisites
 
@@ -175,7 +217,7 @@ python --version
 git --version
 ```
 
-##  Phase 1 - Current Implementation
+##  Phase 1 - Patient Management
 
 ### What's Included
 
@@ -195,6 +237,95 @@ git --version
 - **Lines of Terraform Code:** ~600
 - **Application Code:** ~800 lines
 - **Estimated Monthly Cost:** ~$20-25 USD (t3.micro instances)
+
+## 🎉 Phase 2 - Medicine & Pharmacy (NEW!)
+
+### What's Included
+
+#### Medicine Management System
+-  Complete medicine database with CRUD operations
+-  Searchable medicine catalog (name, generic name, category)
+-  10 medicine categories and 8 dosage forms
+-  Manufacturer and strength tracking
+-  Prescription history per medicine
+-  10 pre-loaded sample medicines
+
+#### Digital Prescription Module
+-  Create and manage patient prescriptions
+-  Link patients, doctors, and medicines
+-  Dosage, frequency, and duration tracking
+-  Diagnosis and special instructions fields
+-  Print-friendly prescription view
+-  Prescription history per patient
+
+#### Pharmacy Finder with Geolocation
+-  Interactive maps using Leaflet.js (OpenStreetMap)
+-  Automatic "Find Nearest 3 Pharmacies" feature
+-  Accurate geodesic distance calculation
+-  Google Maps integration for directions
+-  Operating hours and contact information
+-  6 pre-loaded partner pharmacies in Bengaluru
+-  Distance display from hospital
+
+#### Performance & Caching
+-  Redis caching integration (optional)
+-  Pharmacy list caching (5-minute timeout)
+-  Fallback to SimpleCache when Redis unavailable
+-  Automatic cache invalidation on updates
+
+### Phase 2 Metrics
+
+- **New Routes:** 13 routes added
+- **New Templates:** 10 HTML templates
+- **New Database Models:** 3 models (Medicine, Prescription, Pharmacy)
+- **New Dependencies:** 3 packages (redis, geopy, flask-caching)
+- **Application Code:** +2,800 lines added
+- **Sample Data:** 10 medicines, 6 pharmacies, 2 prescriptions
+
+### Quick Links
+
+- **[Phase 2 Documentation](PHASE2.md)** - Complete implementation guide
+- **[Phase 2 Changelog](CHANGELOG_PHASE2.md)** - Detailed changelog
+- **Branch:** `claude/multi-tier-hospital-app-011CV5Zgs62tZLdCmsmjpPt1`
+
+### New Endpoints
+
+#### Medicine Endpoints
+- `GET /medicines` - List all medicines with search
+- `GET /medicines/new` - Add new medicine form
+- `GET /medicines/<id>` - View medicine details
+- `GET /medicines/<id>/edit` - Edit medicine
+
+#### Prescription Endpoints
+- `GET /prescriptions` - List all prescriptions
+- `GET /prescriptions/new` - Create new prescription
+- `GET /prescriptions/<id>` - View prescription details (printable)
+
+#### Pharmacy Endpoints
+- `GET /pharmacies` - List all pharmacies (cached)
+- `GET /pharmacies/find-nearest` - Interactive pharmacy finder with map
+- `GET /pharmacies/new` - Add new pharmacy
+- `GET /pharmacies/<id>` - View pharmacy details with map
+- `GET /pharmacies/<id>/edit` - Edit pharmacy
+
+### Screenshots & Features
+
+**Medicine Management**
+- Searchable medicine database with categories
+- Detailed medicine information with prescription history
+- Easy-to-use add/edit forms with dropdown selections
+
+**Digital Prescriptions**
+- Complete prescription creation workflow
+- Patient and medicine selection
+- Dosage, frequency, and duration tracking
+- Print-friendly prescription view
+
+**Pharmacy Finder**
+- Interactive map showing hospital and nearby pharmacies
+- Automatic distance calculation
+- Direction links to Google Maps
+- Contact information and operating hours
 
 ## 🎬 Getting Started
 
@@ -281,6 +412,57 @@ http://<EC2_PUBLIC_IP>:5000
 | Dr. Yuvaan Srivastava | yuvaan | yuvaan123 |
 | Dr. Karthik | karthik | karthik123 |
 | Dr. Omkar | omkar | omkar123 |
+
+### Step 7: Deploy Phase 2 Features (NEW!)
+
+If deploying Phase 2 (Medicine & Pharmacy):
+
+```bash
+# SSH into EC2 instance
+ssh -i "your-keypair.pem" ec2-user@<EC2_PUBLIC_IP>
+
+# Navigate to application directory
+cd /home/ec2-user/hospital-app
+
+# Pull Phase 2 changes
+git fetch origin
+git checkout claude/multi-tier-hospital-app-011CV5Zgs62tZLdCmsmjpPt1
+git pull
+
+# Install new dependencies
+cd application
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Initialize Phase 2 sample data
+python init_phase2_data.py
+
+# Restart application
+sudo systemctl restart hospital-app
+sudo systemctl status hospital-app
+```
+
+**Phase 2 URLs:**
+- Medicines: `http://<EC2_PUBLIC_IP>:5000/medicines`
+- Prescriptions: `http://<EC2_PUBLIC_IP>:5000/prescriptions`
+- Pharmacy Finder: `http://<EC2_PUBLIC_IP>:5000/pharmacies/find-nearest`
+
+**Optional - Install Redis (for caching):**
+```bash
+# Install Redis on Amazon Linux 2
+sudo amazon-linux-extras install redis6
+sudo systemctl start redis
+sudo systemctl enable redis
+
+# Verify Redis is running
+redis-cli ping  # Should return PONG
+
+# Add Redis URL to .env file
+echo "REDIS_URL=redis://localhost:6379/0" >> /home/ec2-user/hospital-app/application/.env
+
+# Restart application
+sudo systemctl restart hospital-app
+```
 
 ## Deployment Guide
 
@@ -397,13 +579,14 @@ python app.py
 
 ##  Future Enhancements
 
-### Phase 2: Medicine & Pharmacy Integration
-- Prescription management
-- Pharmacy locator with geolocation
-- Redis caching layer
-- RESTful API development
+### ✅ Phase 2: Medicine & Pharmacy Integration (COMPLETED!)
+- ✅ Medicine management system
+- ✅ Digital prescription module
+- ✅ Pharmacy locator with geolocation and interactive maps
+- ✅ Redis caching layer
+- ✅ 13 new RESTful API endpoints
 
-### Phase 3: Production Architecture
+### Phase 3: Production Architecture (In Progress)
 - Application Load Balancer
 - Auto Scaling Groups (min: 2, max: 4)
 - Multi-AZ RDS deployment
@@ -418,6 +601,32 @@ python app.py
 - Medical report uploads (S3)
 - Appointment scheduling
 - Telemedicine integration
+- Medicine inventory management
+- Prescription refill reminders
+- Multi-language support
+
+---
+
+## 📊 Project Milestones
+
+| Phase | Status | Features | Completion Date |
+|-------|--------|----------|----------------|
+| **Phase 1** | ✅ Complete | Patient Management, Doctor Auth, Dashboard | October 2025 |
+| **Phase 2** | ✅ Complete | Medicine DB, Prescriptions, Pharmacy Finder | November 2025 |
+| **Phase 3** | 🚧 Planned | ALB, Auto Scaling, Multi-AZ, CI/CD | TBD |
+| **Phase 4** | 📋 Planned | Payments, Notifications, Advanced Features | TBD |
+
+### Project Statistics
+
+**Phase 1 + Phase 2 Combined:**
+- **Total Routes:** 30+ REST API endpoints
+- **Total Templates:** 16 HTML pages
+- **Database Models:** 7 models (Doctor, Patient, Medicine, Prescription, Pharmacy, etc.)
+- **Lines of Code:** ~3,600+ lines (Python + HTML + JS)
+- **AWS Resources:** 25+ resources via Terraform
+- **Sample Data:** 4 doctors, 10 medicines, 6 pharmacies
+
+---
 
 ##  Contributing
 
@@ -439,7 +648,20 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - AWS Documentation and Best Practices
 - Flask Community
 - Terraform AWS Provider Documentation
+- OpenStreetMap & Leaflet.js for interactive maps
+- Geopy for accurate distance calculations
+- Bootstrap team for the amazing UI framework
 
 ---
 
-**Built with ❤️ using AWS, Terraform, and Python**
+## 📚 Documentation
+
+- **[Phase 2 Documentation](PHASE2.md)** - Complete Phase 2 implementation guide
+- **[Phase 2 Changelog](CHANGELOG_PHASE2.md)** - Detailed Phase 2 changelog
+- **[Deployment Guide](DEPLOYMENT.md)** - Step-by-step deployment instructions
+
+---
+
+**Built with ❤️ using AWS, Terraform, Python, and Flask**
+
+**Current Version:** Phase 2 Complete | **Branch:** `claude/multi-tier-hospital-app-011CV5Zgs62tZLdCmsmjpPt1`
