@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit' if pharmacy else 'Add New' }} Pharmacy - SKS Medical Center{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-shop"></i>
+                        {{ 'Edit Pharmacy' if pharmacy else 'Add New Pharmacy' }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="row">
+                            <!-- Pharmacy Name -->
+                            <div class="col-md-12 mb-3">
+                                <label for="name" class="form-label">
+                                    Pharmacy Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="name" name="name"
+                                       value="{{ pharmacy.name if pharmacy else '' }}" required>
+                            </div>
+
+                            <!-- Address -->
+                            <div class="col-md-12 mb-3">
+                                <label for="address" class="form-label">
+                                    Address <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" id="address" name="address"
+                                          rows="2" required>{{ pharmacy.address if pharmacy else '' }}</textarea>
+                            </div>
+
+                            <!-- Contact Number -->
+                            <div class="col-md-6 mb-3">
+                                <label for="contact_number" class="form-label">
+                                    Contact Number <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="contact_number" name="contact_number"
+                                       value="{{ pharmacy.contact_number if pharmacy else '' }}"
+                                       placeholder="+91-XXXXXXXXXX" required>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                       value="{{ pharmacy.email if pharmacy else '' }}"
+                                       placeholder="pharmacy@example.com">
+                            </div>
+
+                            <!-- Operating Hours -->
+                            <div class="col-md-12 mb-3">
+                                <label for="operating_hours" class="form-label">Operating Hours</label>
+                                <input type="text" class="form-control" id="operating_hours" name="operating_hours"
+                                       value="{{ pharmacy.operating_hours if pharmacy else '' }}"
+                                       placeholder="e.g., Mon-Sat: 9 AM - 9 PM, Sun: 10 AM - 6 PM">
+                            </div>
+
+                            <!-- Latitude -->
+                            <div class="col-md-6 mb-3">
+                                <label for="latitude" class="form-label">
+                                    Latitude <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" step="0.000001" class="form-control" id="latitude" name="latitude"
+                                       value="{{ pharmacy.latitude if pharmacy else '' }}"
+                                       placeholder="12.9716" required>
+                                <small class="text-muted">Use Google Maps to find coordinates</small>
+                            </div>
+
+                            <!-- Longitude -->
+                            <div class="col-md-6 mb-3">
+                                <label for="longitude" class="form-label">
+                                    Longitude <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" step="0.000001" class="form-control" id="longitude" name="longitude"
+                                       value="{{ pharmacy.longitude if pharmacy else '' }}"
+                                       placeholder="77.5946" required>
+                                <small class="text-muted">Use Google Maps to find coordinates</small>
+                            </div>
+                        </div>
+
+                        <!-- Info Alert -->
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Tip:</strong> To find coordinates, search the pharmacy on Google Maps,
+                            right-click on the location, and select "What's here?" The coordinates will appear.
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('pharmacies') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i>
+                                {{ 'Update Pharmacy' if pharmacy else 'Add Pharmacy' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

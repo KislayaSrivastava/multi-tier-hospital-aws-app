@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_caching import Cache
 from config import Config
-from models import db, Doctor, Patient
+from models import db, Doctor, Patient, Medicine, Prescription, Pharmacy
 from datetime import datetime
+from geopy.distance import geodesic
 import os
 import logging
 
@@ -12,6 +14,7 @@ app.config.from_object(Config)
 
 # Initialize extensions
 db.init_app(app)
+cache = Cache(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -278,6 +281,287 @@ def edit_patient(patient_id):
             logger.error(f"Error updating patient: {str(e)}")
     
     return render_template('patient_form.html', patient=patient)
+
+# ============================================================================
+# Phase 2 Routes: Medicine Management
+# ============================================================================
+
+@app.route('/medicines')
+@login_required
+def medicines():
+    """List all medicines"""
+    search_query = request.args.get('search', '').strip()
+
+    if search_query:
+        medicines_list = Medicine.query.filter(
+            db.or_(
+                Medicine.name.ilike(f'%{search_query}%'),
+                Medicine.generic_name.ilike(f'%{search_query}%'),
+                Medicine.category.ilike(f'%{search_query}%')
+            )
+        ).filter_by(is_active=True).order_by(Medicine.name).all()
+    else:
+        medicines_list = Medicine.query.filter_by(is_active=True).order_by(Medicine.name).all()
+
+    return render_template('medicines.html', medicines=medicines_list, search_query=search_query)
+
+@app.route('/medicines/new', methods=['GET', 'POST'])
+@login_required
+def new_medicine():
+    """Add new medicine"""
+    if request.method == 'POST':
+        try:
+            medicine = Medicine(
+                name=request.form.get('name', '').strip(),
+                generic_name=request.form.get('generic_name', '').strip() or None,
+                description=request.form.get('description', '').strip() or None,
+                category=request.form.get('category', '').strip() or None,
+                dosage_form=request.form.get('dosage_form', '').strip() or None,
+                strength=request.form.get('strength', '').strip() or None,
+                manufacturer=request.form.get('manufacturer', '').strip() or None
+            )
+
+            db.session.add(medicine)
+            db.session.commit()
+
+            logger.info(f"New medicine added: {medicine.name} (ID: {medicine.id})")
+            flash(f'Medicine {medicine.name} added successfully!', 'success')
+            return redirect(url_for('medicines'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding medicine: {str(e)}', 'danger')
+            logger.error(f"Error creating medicine: {str(e)}")
+
+    return render_template('medicine_form.html', medicine=None)
+
+@app.route('/medicines/<int:medicine_id>')
+@login_required
+def medicine_detail(medicine_id):
+    """View medicine details"""
+    medicine = Medicine.query.get_or_404(medicine_id)
+    prescription_count = Prescription.query.filter_by(medicine_id=medicine_id).count()
+    return render_template('medicine_detail.html', medicine=medicine, prescription_count=prescription_count)
+
+@app.route('/medicines/<int:medicine_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_medicine(medicine_id):
+    """Edit medicine information"""
+    medicine = Medicine.query.get_or_404(medicine_id)
+
+    if request.method == 'POST':
+        try:
+            medicine.name = request.form.get('name', '').strip()
+            medicine.generic_name = request.form.get('generic_name', '').strip() or None
+            medicine.description = request.form.get('description', '').strip() or None
+            medicine.category = request.form.get('category', '').strip() or None
+            medicine.dosage_form = request.form.get('dosage_form', '').strip() or None
+            medicine.strength = request.form.get('strength', '').strip() or None
+            medicine.manufacturer = request.form.get('manufacturer', '').strip() or None
+            medicine.updated_at = datetime.utcnow()
+
+            db.session.commit()
+
+            logger.info(f"Medicine updated: {medicine.name} (ID: {medicine.id})")
+            flash(f'Medicine {medicine.name} updated successfully!', 'success')
+            return redirect(url_for('medicine_detail', medicine_id=medicine.id))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating medicine: {str(e)}', 'danger')
+            logger.error(f"Error updating medicine: {str(e)}")
+
+    return render_template('medicine_form.html', medicine=medicine)
+
+# ============================================================================
+# Phase 2 Routes: Prescription Management
+# ============================================================================
+
+@app.route('/prescriptions')
+@login_required
+def prescriptions():
+    """List all prescriptions"""
+    patient_id = request.args.get('patient_id', type=int)
+
+    if patient_id:
+        prescriptions_list = Prescription.query.filter_by(patient_id=patient_id).order_by(Prescription.prescribed_date.desc()).all()
+    else:
+        prescriptions_list = Prescription.query.order_by(Prescription.prescribed_date.desc()).limit(50).all()
+
+    return render_template('prescriptions.html', prescriptions=prescriptions_list)
+
+@app.route('/prescriptions/new', methods=['GET', 'POST'])
+@login_required
+def new_prescription():
+    """Create new prescription"""
+    patient_id = request.args.get('patient_id', type=int)
+    patient = Patient.query.get(patient_id) if patient_id else None
+
+    if request.method == 'POST':
+        try:
+            prescription = Prescription(
+                patient_id=request.form.get('patient_id', type=int),
+                doctor_id=current_user.id,
+                medicine_id=request.form.get('medicine_id', type=int),
+                dosage=request.form.get('dosage', '').strip(),
+                frequency=request.form.get('frequency', '').strip(),
+                duration=request.form.get('duration', '').strip(),
+                instructions=request.form.get('instructions', '').strip() or None,
+                diagnosis=request.form.get('diagnosis', '').strip() or None
+            )
+
+            db.session.add(prescription)
+            db.session.commit()
+
+            logger.info(f"New prescription created (ID: {prescription.id}) for patient {prescription.patient_id}")
+            flash('Prescription created successfully!', 'success')
+            return redirect(url_for('prescription_detail', prescription_id=prescription.id))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error creating prescription: {str(e)}', 'danger')
+            logger.error(f"Error creating prescription: {str(e)}")
+
+    patients_list = Patient.query.order_by(Patient.first_name).all()
+    medicines_list = Medicine.query.filter_by(is_active=True).order_by(Medicine.name).all()
+
+    return render_template('prescription_form.html',
+                         prescription=None,
+                         patient=patient,
+                         patients=patients_list,
+                         medicines=medicines_list)
+
+@app.route('/prescriptions/<int:prescription_id>')
+@login_required
+def prescription_detail(prescription_id):
+    """View prescription details"""
+    prescription = Prescription.query.get_or_404(prescription_id)
+    return render_template('prescription_detail.html', prescription=prescription)
+
+# ============================================================================
+# Phase 2 Routes: Pharmacy Management & Finder
+# ============================================================================
+
+@app.route('/pharmacies')
+@login_required
+@cache.cached(timeout=300, query_string=True)
+def pharmacies():
+    """List all pharmacies"""
+    pharmacies_list = Pharmacy.query.filter_by(is_active=True).order_by(Pharmacy.name).all()
+    return render_template('pharmacies.html', pharmacies=pharmacies_list)
+
+@app.route('/pharmacies/find-nearest')
+@login_required
+def find_nearest_pharmacies():
+    """Find nearest pharmacies based on coordinates"""
+    # Get coordinates from query params or use hospital location
+    latitude = request.args.get('lat', type=float, default=app.config['HOSPITAL_LATITUDE'])
+    longitude = request.args.get('lng', type=float, default=app.config['HOSPITAL_LONGITUDE'])
+
+    user_location = (latitude, longitude)
+
+    # Get all active pharmacies
+    all_pharmacies = Pharmacy.query.filter_by(is_active=True).all()
+
+    # Calculate distances and sort
+    pharmacies_with_distance = []
+    for pharmacy in all_pharmacies:
+        pharmacy_location = (pharmacy.latitude, pharmacy.longitude)
+        distance = geodesic(user_location, pharmacy_location).kilometers
+        pharmacies_with_distance.append({
+            'pharmacy': pharmacy,
+            'distance': round(distance, 2)
+        })
+
+    # Sort by distance and get nearest 3
+    pharmacies_with_distance.sort(key=lambda x: x['distance'])
+    nearest_pharmacies = pharmacies_with_distance[:3]
+
+    return render_template('pharmacy_finder.html',
+                         nearest_pharmacies=nearest_pharmacies,
+                         user_lat=latitude,
+                         user_lng=longitude,
+                         hospital_lat=app.config['HOSPITAL_LATITUDE'],
+                         hospital_lng=app.config['HOSPITAL_LONGITUDE'])
+
+@app.route('/pharmacies/new', methods=['GET', 'POST'])
+@login_required
+def new_pharmacy():
+    """Add new pharmacy"""
+    if request.method == 'POST':
+        try:
+            pharmacy = Pharmacy(
+                name=request.form.get('name', '').strip(),
+                address=request.form.get('address', '').strip(),
+                contact_number=request.form.get('contact_number', '').strip(),
+                email=request.form.get('email', '').strip() or None,
+                latitude=float(request.form.get('latitude')),
+                longitude=float(request.form.get('longitude')),
+                operating_hours=request.form.get('operating_hours', '').strip() or None
+            )
+
+            db.session.add(pharmacy)
+            db.session.commit()
+
+            # Clear cache
+            cache.clear()
+
+            logger.info(f"New pharmacy added: {pharmacy.name} (ID: {pharmacy.id})")
+            flash(f'Pharmacy {pharmacy.name} added successfully!', 'success')
+            return redirect(url_for('pharmacies'))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error adding pharmacy: {str(e)}', 'danger')
+            logger.error(f"Error creating pharmacy: {str(e)}")
+
+    return render_template('pharmacy_form.html', pharmacy=None)
+
+@app.route('/pharmacies/<int:pharmacy_id>')
+@login_required
+def pharmacy_detail(pharmacy_id):
+    """View pharmacy details"""
+    pharmacy = Pharmacy.query.get_or_404(pharmacy_id)
+
+    # Calculate distance from hospital
+    hospital_location = (app.config['HOSPITAL_LATITUDE'], app.config['HOSPITAL_LONGITUDE'])
+    pharmacy_location = (pharmacy.latitude, pharmacy.longitude)
+    distance = round(geodesic(hospital_location, pharmacy_location).kilometers, 2)
+
+    return render_template('pharmacy_detail.html', pharmacy=pharmacy, distance=distance)
+
+@app.route('/pharmacies/<int:pharmacy_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_pharmacy(pharmacy_id):
+    """Edit pharmacy information"""
+    pharmacy = Pharmacy.query.get_or_404(pharmacy_id)
+
+    if request.method == 'POST':
+        try:
+            pharmacy.name = request.form.get('name', '').strip()
+            pharmacy.address = request.form.get('address', '').strip()
+            pharmacy.contact_number = request.form.get('contact_number', '').strip()
+            pharmacy.email = request.form.get('email', '').strip() or None
+            pharmacy.latitude = float(request.form.get('latitude'))
+            pharmacy.longitude = float(request.form.get('longitude'))
+            pharmacy.operating_hours = request.form.get('operating_hours', '').strip() or None
+            pharmacy.updated_at = datetime.utcnow()
+
+            db.session.commit()
+
+            # Clear cache
+            cache.clear()
+
+            logger.info(f"Pharmacy updated: {pharmacy.name} (ID: {pharmacy.id})")
+            flash(f'Pharmacy {pharmacy.name} updated successfully!', 'success')
+            return redirect(url_for('pharmacy_detail', pharmacy_id=pharmacy.id))
+
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating pharmacy: {str(e)}', 'danger')
+            logger.error(f"Error updating pharmacy: {str(e)}")
+
+    return render_template('pharmacy_form.html', pharmacy=pharmacy)
 
 # Error handlers
 
